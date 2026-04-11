@@ -1990,3 +1990,7 @@ Script Stack (0 frames):
 [2026.04.07-02.22.21:410][515]LogSlate: Updating window title bar state: overlay mode, drag disabled, window buttons hidden, title bar hidden
 [2026.04.07-02.22.21:414][515]LogUObjectHash: Compacting FUObjectHashTables data took   3.08ms
 [2026.04.07-02.22.21:443][516]LogPlayLevel: Display: Destroying online subsystem :Context_23
+[2026.04.07-02.31.45:875][284]LogUObjectHash: Compacting FUObjectHashTables data took   4.14ms
+[2026.04.07-02.31.45:901][284]LogSavePackage: Moving 'C:/Github/Others/CPSC399_Game/CPSC399Game/Saved/Map1_Auto4A7138DEE405935FCC020CF952948B24F.tmp' to 'C:/Github/Others/CPSC399_Game/CPSC399Game/Saved/Autosaves/Game/ThirdPersonBP/Maps/Map1_Auto4.umap'
+[2026.04.07-02.31.45:902][284]LogFileHelpers: Editor autosave (incl. external actors) for '/Game/ThirdPersonBP/Maps/Map1' took 0.067
+[2026.04.07-02.31.45:902][284]LogFileHelpers: Editor autosave (incl. sublevels & external actors) for all levels took 0.067
