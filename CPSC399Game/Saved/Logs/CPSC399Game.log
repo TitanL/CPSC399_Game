@@ -2326,3 +2326,147 @@ LogConfig: Setting CVar [[r.setres:1280x720]]
 [2026.04.12-20.52.13:730][212]LogAudioMixer: FMixerPlatformXAudio2::StopAudioStream() called
 [2026.04.12-20.52.13:756][212]LogUObjectHash: Compacting FUObjectHashTables data took   2.38ms
 [2026.04.12-20.52.13:779][213]LogPlayLevel: Display: Destroying online subsystem :Context_46
+[2026.04.12-20.54.36:445][  7]LogAssetEditorSubsystem: Opening Asset editor for LevelScriptBlueprint /Game/ThirdPersonBP/Maps/Map1.Map1:PersistentLevel.Map1
+[2026.04.12-20.56.34:133][233]BlueprintLog: New page: Compile Map1
+[2026.04.12-20.56.34:163][233]LogUObjectHash: Compacting FUObjectHashTables data took   1.74ms
+[2026.04.12-20.57.13:134][ 87]LogEditorTransaction: Undo Move Nodes
+[2026.04.12-20.58.47:340][725]BlueprintLog: New page: Compile Map1
+[2026.04.12-20.58.47:368][725]LogUObjectHash: Compacting FUObjectHashTables data took   1.61ms
+[2026.04.12-20.58.48:165][797]LogTemp: Repeating last play command: Selected Viewport
+[2026.04.12-20.58.48:169][797]LogPlayLevel: PlayLevel: No blueprints needed recompiling
+[2026.04.12-20.58.48:169][797]PIE: New page: PIE session: Map1 (Apr. 12, 2026, 8:58:48 a.m.)
+[2026.04.12-20.58.48:193][797]LogPlayLevel: Creating play world package: /Game/ThirdPersonBP/Maps/UEDPIE_0_Map1
+[2026.04.12-20.58.48:198][797]LogPlayLevel: PIE: StaticDuplicateObject took: (0.005153s)
+[2026.04.12-20.58.48:199][797]LogAIModule: Creating AISystem for world Map1
+[2026.04.12-20.58.48:199][797]LogPlayLevel: PIE: World Init took: (0.000823s)
+[2026.04.12-20.58.48:199][797]LogPlayLevel: PIE: Created PIE world by copying editor world from /Game/ThirdPersonBP/Maps/Map1.Map1 to /Game/ThirdPersonBP/Maps/UEDPIE_0_Map1.Map1 (0.006108s)
+[2026.04.12-20.58.48:213][797]LogUObjectHash: Compacting FUObjectHashTables data took   1.25ms
+[2026.04.12-20.58.48:214][797]LogAudio: Display: Creating Audio Device:                 Id: 18, Scope: Unique, Realtime: True
+[2026.04.12-20.58.48:214][797]LogAudioMixer: Display: Audio Mixer Platform Settings:
+[2026.04.12-20.58.48:214][797]LogAudioMixer: Display: 	Sample Rate:						  48000
+[2026.04.12-20.58.48:214][797]LogAudioMixer: Display: 	Callback Buffer Frame Size Requested: 1024
+[2026.04.12-20.58.48:214][797]LogAudioMixer: Display: 	Callback Buffer Frame Size To Use:	  1024
+[2026.04.12-20.58.48:214][797]LogAudioMixer: Display: 	Number of buffers to queue:			  2
+[2026.04.12-20.58.48:214][797]LogAudioMixer: Display: 	Max Channels (voices):				  32
+[2026.04.12-20.58.48:214][797]LogAudioMixer: Display: 	Number of Async Source Workers:		  0
+[2026.04.12-20.58.48:214][797]LogAudio: Display: AudioDevice MaxSources: 32
+[2026.04.12-20.58.48:214][797]LogAudio: Display: Audio Spatialization Plugin: None (built-in).
+[2026.04.12-20.58.48:214][797]LogAudio: Display: Audio Reverb Plugin: None (built-in).
+[2026.04.12-20.58.48:214][797]LogAudio: Display: Audio Occlusion Plugin: None (built-in).
+[2026.04.12-20.58.48:214][797]LogAudioMixer: Display: Initializing audio mixer.
+[2026.04.12-20.58.48:217][797]LogAudioMixer: Display: 0: FrontLeft
+[2026.04.12-20.58.48:217][797]LogAudioMixer: Display: 1: FrontRight
+[2026.04.12-20.58.48:217][797]LogAudioMixer: Display: 2: FrontCenter
+[2026.04.12-20.58.48:217][797]LogAudioMixer: Display: 3: LowFrequency
+[2026.04.12-20.58.48:217][797]LogAudioMixer: Display: 4: BackLeft
+[2026.04.12-20.58.48:217][797]LogAudioMixer: Display: 5: BackRight
+[2026.04.12-20.58.48:217][797]LogAudioMixer: Display: 6: SideLeft
+[2026.04.12-20.58.48:217][797]LogAudioMixer: Display: 7: SideRight
+[2026.04.12-20.58.48:229][797]LogAudioMixer: Display: Using Audio Device Headset Earphone (CORSAIR VOID PRO Wireless Gaming Headset)
+[2026.04.12-20.58.48:229][797]LogAudioMixer: Display: Initializing Sound Submixes...
+[2026.04.12-20.58.48:229][797]LogAudioMixer: Display: Creating Master Submix 'MasterSubmixDefault'
+[2026.04.12-20.58.48:229][797]LogAudioMixer: Display: Creating Master Submix 'MasterReverbSubmixDefault'
+[2026.04.12-20.58.48:230][797]LogAudioMixer: Display: Creating Master Submix 'MasterEQSubmixDefault'
+[2026.04.12-20.58.48:230][797]LogAudioMixer: FMixerPlatformXAudio2::StartAudioStream() called
+[2026.04.12-20.58.48:230][797]LogAudioMixer: Display: Output buffers initialized: Frames=1024, Channels=8, Samples=8192
+[2026.04.12-20.58.48:231][797]LogAudioMixer: Display: Starting AudioMixerPlatformInterface::RunInternal()
+[2026.04.12-20.58.48:231][797]LogAudioMixer: Display: FMixerPlatformXAudio2::SubmitBuffer() called for the first time
+[2026.04.12-20.58.48:231][797]LogInit: FAudioDevice initialized.
+[2026.04.12-20.58.48:231][797]LogAudio: Display: Audio Device (ID: 18) registered with world 'Map1'.
+[2026.04.12-20.58.48:248][797]LogLoad: Game class is 'ThirdPersonGameMode_C'
+[2026.04.12-20.58.48:250][797]LogWorld: Bringing World /Game/ThirdPersonBP/Maps/UEDPIE_0_Map1.Map1 up for play (max tick rate 0) at 2026.04.12-14.58.48
+[2026.04.12-20.58.48:250][797]LogWorld: Bringing up level for play took: 0.001911
+[2026.04.12-20.58.48:250][797]LogOnline: OSS: Creating online subsystem instance for: :Context_48
+[2026.04.12-20.58.48:254][797]LogPlayerController: Error: InputMode:UIOnly - Attempting to focus Non-Focusable widget SObjectWidget [Widget.cpp(799)]!
+[2026.04.12-20.58.48:254][797]LogViewport: Display: Viewport MouseLockMode Changed, LockOnCapture -> DoNotLock
+[2026.04.12-20.58.48:254][797]LogViewport: Display: Viewport MouseCaptureMode Changed, CapturePermanently_IncludingInitialMouseDown -> NoCapture
+[2026.04.12-20.58.48:254][797]PIE: Server logged in
+[2026.04.12-20.58.48:255][797]PIE: Play in editor total start time 0.086 seconds.
+[2026.04.12-20.58.49:919][976]LogViewport: Display: Viewport MouseLockMode Changed, DoNotLock -> LockOnCapture
+[2026.04.12-20.58.49:919][976]LogViewport: Display: Viewport MouseCaptureMode Changed, NoCapture -> CapturePermanently
+[2026.04.12-20.59.01:473][362]LogBlueprintUserMessages: [Map1_C_1] Power: More Jump!
+[2026.04.12-20.59.10:884][488]LogSlate: Updating window title bar state: overlay mode, drag disabled, window buttons hidden, title bar hidden
+[2026.04.12-20.59.10:884][488]LogWorld: BeginTearingDown for /Game/ThirdPersonBP/Maps/UEDPIE_0_Map1
+[2026.04.12-20.59.10:884][488]LogWorld: UWorld::CleanupWorld for Map1, bSessionEnded=true, bCleanupResources=true
+[2026.04.12-20.59.10:885][488]LogSlate: InvalidateAllWidgets triggered.  All widgets were invalidated
+[2026.04.12-20.59.10:890][488]LogPlayLevel: Display: Shutting down PIE online subsystems
+[2026.04.12-20.59.10:899][488]LogSlate: InvalidateAllWidgets triggered.  All widgets were invalidated
+[2026.04.12-20.59.10:911][488]LogAudio: Display: Audio Device unregistered from world 'None'.
+[2026.04.12-20.59.10:911][488]LogAudioMixer: FMixerPlatformXAudio2::StopAudioStream() called
+[2026.04.12-20.59.10:913][488]LogAudioMixer: FMixerPlatformXAudio2::StopAudioStream() called
+[2026.04.12-20.59.10:914][488]LogSlate: Updating window title bar state: overlay mode, drag disabled, window buttons hidden, title bar hidden
+[2026.04.12-20.59.10:916][488]LogUObjectHash: Compacting FUObjectHashTables data took   1.20ms
+[2026.04.12-20.59.10:967][490]LogPlayLevel: Display: Destroying online subsystem :Context_48
+[2026.04.12-20.59.13:594][804]LogTemp: Repeating last play command: Selected Viewport
+[2026.04.12-20.59.13:598][804]LogPlayLevel: PlayLevel: No blueprints needed recompiling
+[2026.04.12-20.59.13:598][804]PIE: New page: PIE session: Map1 (Apr. 12, 2026, 8:59:13 a.m.)
+[2026.04.12-20.59.13:623][804]LogPlayLevel: Creating play world package: /Game/ThirdPersonBP/Maps/UEDPIE_0_Map1
+[2026.04.12-20.59.13:628][804]LogPlayLevel: PIE: StaticDuplicateObject took: (0.004972s)
+[2026.04.12-20.59.13:629][804]LogAIModule: Creating AISystem for world Map1
+[2026.04.12-20.59.13:629][804]LogPlayLevel: PIE: World Init took: (0.000697s)
+[2026.04.12-20.59.13:629][804]LogPlayLevel: PIE: Created PIE world by copying editor world from /Game/ThirdPersonBP/Maps/Map1.Map1 to /Game/ThirdPersonBP/Maps/UEDPIE_0_Map1.Map1 (0.005797s)
+[2026.04.12-20.59.13:644][804]LogUObjectHash: Compacting FUObjectHashTables data took   1.14ms
+[2026.04.12-20.59.13:645][804]LogAudio: Display: Creating Audio Device:                 Id: 19, Scope: Unique, Realtime: True
+[2026.04.12-20.59.13:645][804]LogAudioMixer: Display: Audio Mixer Platform Settings:
+[2026.04.12-20.59.13:645][804]LogAudioMixer: Display: 	Sample Rate:						  48000
+[2026.04.12-20.59.13:645][804]LogAudioMixer: Display: 	Callback Buffer Frame Size Requested: 1024
+[2026.04.12-20.59.13:645][804]LogAudioMixer: Display: 	Callback Buffer Frame Size To Use:	  1024
+[2026.04.12-20.59.13:645][804]LogAudioMixer: Display: 	Number of buffers to queue:			  2
+[2026.04.12-20.59.13:645][804]LogAudioMixer: Display: 	Max Channels (voices):				  32
+[2026.04.12-20.59.13:645][804]LogAudioMixer: Display: 	Number of Async Source Workers:		  0
+[2026.04.12-20.59.13:645][804]LogAudio: Display: AudioDevice MaxSources: 32
+[2026.04.12-20.59.13:646][804]LogAudio: Display: Audio Spatialization Plugin: None (built-in).
+[2026.04.12-20.59.13:646][804]LogAudio: Display: Audio Reverb Plugin: None (built-in).
+[2026.04.12-20.59.13:646][804]LogAudio: Display: Audio Occlusion Plugin: None (built-in).
+[2026.04.12-20.59.13:646][804]LogAudioMixer: Display: Initializing audio mixer.
+[2026.04.12-20.59.13:648][804]LogAudioMixer: Display: 0: FrontLeft
+[2026.04.12-20.59.13:648][804]LogAudioMixer: Display: 1: FrontRight
+[2026.04.12-20.59.13:648][804]LogAudioMixer: Display: 2: FrontCenter
+[2026.04.12-20.59.13:648][804]LogAudioMixer: Display: 3: LowFrequency
+[2026.04.12-20.59.13:648][804]LogAudioMixer: Display: 4: BackLeft
+[2026.04.12-20.59.13:648][804]LogAudioMixer: Display: 5: BackRight
+[2026.04.12-20.59.13:648][804]LogAudioMixer: Display: 6: SideLeft
+[2026.04.12-20.59.13:648][804]LogAudioMixer: Display: 7: SideRight
+[2026.04.12-20.59.13:659][804]LogAudioMixer: Display: Using Audio Device Headset Earphone (CORSAIR VOID PRO Wireless Gaming Headset)
+[2026.04.12-20.59.13:660][804]LogAudioMixer: Display: Initializing Sound Submixes...
+[2026.04.12-20.59.13:660][804]LogAudioMixer: Display: Creating Master Submix 'MasterSubmixDefault'
+[2026.04.12-20.59.13:660][804]LogAudioMixer: Display: Creating Master Submix 'MasterReverbSubmixDefault'
+[2026.04.12-20.59.13:660][804]LogAudioMixer: Display: Creating Master Submix 'MasterEQSubmixDefault'
+[2026.04.12-20.59.13:660][804]LogAudioMixer: FMixerPlatformXAudio2::StartAudioStream() called
+[2026.04.12-20.59.13:660][804]LogAudioMixer: Display: Output buffers initialized: Frames=1024, Channels=8, Samples=8192
+[2026.04.12-20.59.13:661][804]LogAudioMixer: Display: Starting AudioMixerPlatformInterface::RunInternal()
+[2026.04.12-20.59.13:661][804]LogAudioMixer: Display: FMixerPlatformXAudio2::SubmitBuffer() called for the first time
+[2026.04.12-20.59.13:661][804]LogInit: FAudioDevice initialized.
+[2026.04.12-20.59.13:661][804]LogAudio: Display: Audio Device (ID: 19) registered with world 'Map1'.
+[2026.04.12-20.59.13:666][804]LogLoad: Game class is 'ThirdPersonGameMode_C'
+[2026.04.12-20.59.13:668][804]LogWorld: Bringing World /Game/ThirdPersonBP/Maps/UEDPIE_0_Map1.Map1 up for play (max tick rate 0) at 2026.04.12-14.59.13
+[2026.04.12-20.59.13:668][804]LogWorld: Bringing up level for play took: 0.001448
+[2026.04.12-20.59.13:668][804]LogOnline: OSS: Creating online subsystem instance for: :Context_49
+[2026.04.12-20.59.13:671][804]LogPlayerController: Error: InputMode:UIOnly - Attempting to focus Non-Focusable widget SObjectWidget [Widget.cpp(799)]!
+[2026.04.12-20.59.13:671][804]LogViewport: Display: Viewport MouseLockMode Changed, LockOnCapture -> DoNotLock
+[2026.04.12-20.59.13:671][804]LogViewport: Display: Viewport MouseCaptureMode Changed, CapturePermanently_IncludingInitialMouseDown -> NoCapture
+[2026.04.12-20.59.13:671][804]PIE: Server logged in
+[2026.04.12-20.59.13:672][804]PIE: Play in editor total start time 0.075 seconds.
+[2026.04.12-20.59.14:080][852]LogViewport: Display: Viewport MouseLockMode Changed, DoNotLock -> LockOnCapture
+[2026.04.12-20.59.14:080][852]LogViewport: Display: Viewport MouseCaptureMode Changed, NoCapture -> CapturePermanently
+[2026.04.12-20.59.21:214][708]LogBlueprintUserMessages: [Map1_C_1] Power: Speed Boost!
+[2026.04.12-20.59.29:427][692]LogBlueprintUserMessages: [Map1_C_1] Power: Speed Boost!
+[2026.04.12-20.59.32:795][ 96]LogCharacterMovement: ThirdPersonCharacter_C_0 is stuck and failed to move! Velocity: X=-785.79 Y=696.44 Z=0.00 Location: X=6939.85 Y=-48.00 Z=117.47 Normal: X=-0.85 Y=-0.53 Z=0.00 PenetrationDepth:0.708 Actor:BP_SpinObstacle2 Component:Cylinder2 BoneName:None (0 other events since notify)
+[2026.04.12-21.00.00:994][477]LogSlate: Updating window title bar state: overlay mode, drag disabled, window buttons hidden, title bar hidden
+[2026.04.12-21.00.00:994][477]LogWorld: BeginTearingDown for /Game/ThirdPersonBP/Maps/UEDPIE_0_Map1
+[2026.04.12-21.00.00:994][477]LogWorld: UWorld::CleanupWorld for Map1, bSessionEnded=true, bCleanupResources=true
+[2026.04.12-21.00.00:995][477]LogSlate: InvalidateAllWidgets triggered.  All widgets were invalidated
+[2026.04.12-21.00.01:006][477]LogPlayLevel: Display: Shutting down PIE online subsystems
+[2026.04.12-21.00.01:015][477]LogSlate: InvalidateAllWidgets triggered.  All widgets were invalidated
+[2026.04.12-21.00.01:027][477]LogSlate: Updating window title bar state: overlay mode, drag disabled, window buttons hidden, title bar hidden
+[2026.04.12-21.00.01:027][477]LogAudioMixer: FMixerPlatformXAudio2::StopAudioStream() called
+[2026.04.12-21.00.01:028][477]LogAudioMixer: FMixerPlatformXAudio2::StopAudioStream() called
+[2026.04.12-21.00.01:033][477]LogUObjectHash: Compacting FUObjectHashTables data took   1.21ms
+[2026.04.12-21.00.01:085][479]LogPlayLevel: Display: Destroying online subsystem :Context_49
+[2026.04.12-21.00.11:377][431]LogUObjectHash: Compacting FUObjectHashTables data took   1.13ms
+[2026.04.12-21.00.11:400][431]Cmd: OBJ SAVEPACKAGE PACKAGE="/Game/ThirdPersonBP/Maps/Map1" FILE="C:/Users/titan/Desktop/CPSC399_Game/CPSC399Game/Content/ThirdPersonBP/Maps/Map1.umap" SILENT=true AUTOSAVING=false KEEPDIRTY=false
+[2026.04.12-21.00.11:413][431]LogUObjectHash: Compacting FUObjectHashTables data took   0.37ms
+[2026.04.12-21.00.11:440][431]LogSavePackage: Moving 'C:/Users/titan/Desktop/CPSC399_Game/CPSC399Game/Saved/Map1310BBF4B4B4FA69C76C8E2BB917BBCFD.tmp' to 'C:/Users/titan/Desktop/CPSC399_Game/CPSC399Game/Content/ThirdPersonBP/Maps/Map1.umap'
+[2026.04.12-21.00.11:451][431]LogFileHelpers: Saving map 'Map1' took 0.051
+[2026.04.12-21.00.11:469][431]AssetCheck: New page: Asset Save: Map1
+[2026.04.12-21.00.11:469][431]LogContentValidation: Display: Validating World /Game/ThirdPersonBP/Maps/Map1.Map1
