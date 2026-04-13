@@ -1,0 +1,14 @@
+# Visual Studio
+.vs/
+*.VC.db
+*.VC.opendb
+*.ipch
+
+# Unreal build files
+Binaries/
+DerivedDataCache/
+Intermediate/
+Saved/
+
+# Optional
+*.sln

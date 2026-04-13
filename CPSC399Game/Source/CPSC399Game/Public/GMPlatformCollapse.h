@@ -4,8 +4,6 @@
 #include "GameFramework/Actor.h"
 #include "GMPlatformCollapse.generated.h"
 
-class USceneComponent;
-
 UCLASS()
 class CPSC399GAME_API AGMPlatformCollapse : public AActor
 {
@@ -14,11 +12,14 @@ class CPSC399GAME_API AGMPlatformCollapse : public AActor
 public:
     AGMPlatformCollapse();
 
-    virtual void BeginPlay() override;
-    virtual void OnConstruction(const FTransform& Transform) override;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GM")
+    AActor* TargetPlatform = nullptr;
 
-    UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "GM")
-    AActor* TargetPlatform;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GM")
+    float RestoreDelay = 3.0f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GM")
+    float LocalCooldown = 5.0f;
 
     UFUNCTION(BlueprintCallable, Category = "GM")
     void CollapsePlatform();
@@ -27,15 +28,18 @@ public:
     void RestorePlatform();
 
     UFUNCTION(BlueprintPure, Category = "GM")
-    bool IsCollapsed() const;
+    bool CanTrigger() const;
 
-protected:
-    UPROPERTY(VisibleAnywhere, Category = "GM")
-    USceneComponent* SceneRoot;
+    UFUNCTION(BlueprintPure, Category = "GM")
+    bool IsOnLocalCooldown() const;
 
-    bool bInitialHiddenInGame;
-    bool bInitialCollisionEnabled;
-    bool bCollapsed;
+    UFUNCTION(BlueprintPure, Category = "GM")
+    AActor* GetFocusActor() const;
 
-    void SnapHelperToTarget();
+private:
+    float NextReadyTime = 0.0f;
+    FTimerHandle RestoreTimer;
+
+    AActor* GetControlledActor() const;
+    void SetActorBlockedState(AActor* ActorToEdit, bool bBlocked) const;
 };

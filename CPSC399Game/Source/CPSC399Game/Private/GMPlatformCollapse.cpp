@@ -1,72 +1,81 @@
 #include "GMPlatformCollapse.h"
 
-#include "Components/SceneComponent.h"
+#include "Components/PrimitiveComponent.h"
+#include "TimerManager.h"
 
 AGMPlatformCollapse::AGMPlatformCollapse()
 {
     PrimaryActorTick.bCanEverTick = false;
-
-    SceneRoot = CreateDefaultSubobject<USceneComponent>(TEXT("SceneRoot"));
-    RootComponent = SceneRoot;
-
-    TargetPlatform = nullptr;
-    bInitialHiddenInGame = false;
-    bInitialCollisionEnabled = true;
-    bCollapsed = false;
 }
 
-void AGMPlatformCollapse::OnConstruction(const FTransform& Transform)
+AActor* AGMPlatformCollapse::GetControlledActor() const
 {
-    Super::OnConstruction(Transform);
-    SnapHelperToTarget();
+    return IsValid(TargetPlatform) ? TargetPlatform : const_cast<AGMPlatformCollapse*>(this);
 }
 
-void AGMPlatformCollapse::BeginPlay()
+AActor* AGMPlatformCollapse::GetFocusActor() const
 {
-    Super::BeginPlay();
+    return GetControlledActor();
+}
 
-    if (IsValid(TargetPlatform))
+bool AGMPlatformCollapse::IsOnLocalCooldown() const
+{
+    const UWorld* World = GetWorld();
+    return World && World->GetTimeSeconds() < NextReadyTime;
+}
+
+bool AGMPlatformCollapse::CanTrigger() const
+{
+    return IsValid(GetControlledActor()) && !IsOnLocalCooldown();
+}
+
+void AGMPlatformCollapse::SetActorBlockedState(AActor* ActorToEdit, bool bBlocked) const
+{
+    if (!IsValid(ActorToEdit))
     {
-        bInitialHiddenInGame = TargetPlatform->IsHidden();
-        bInitialCollisionEnabled = TargetPlatform->GetActorEnableCollision();
-        SnapHelperToTarget();
+        return;
     }
-}
 
-void AGMPlatformCollapse::SnapHelperToTarget()
-{
-    if (IsValid(TargetPlatform))
+    ActorToEdit->SetActorHiddenInGame(!bBlocked);
+    ActorToEdit->SetActorEnableCollision(bBlocked);
+
+    TArray<UActorComponent*> PrimitiveComponents = ActorToEdit->GetComponentsByClass(UPrimitiveComponent::StaticClass());
+    for (UActorComponent* Component : PrimitiveComponents)
     {
-        SetActorLocation(TargetPlatform->GetActorLocation());
+        if (UPrimitiveComponent* Primitive = Cast<UPrimitiveComponent>(Component))
+        {
+            Primitive->SetVisibility(bBlocked, true);
+            Primitive->SetCollisionEnabled(
+                bBlocked ? ECollisionEnabled::QueryAndPhysics : ECollisionEnabled::NoCollision
+            );
+        }
     }
 }
 
 void AGMPlatformCollapse::CollapsePlatform()
 {
-    if (!IsValid(TargetPlatform))
+    if (!CanTrigger())
     {
         return;
     }
 
-    TargetPlatform->SetActorHiddenInGame(true);
-    TargetPlatform->SetActorEnableCollision(false);
-    bCollapsed = true;
+    AActor* ControlledActor = GetControlledActor();
+    if (!IsValid(ControlledActor))
+    {
+        return;
+    }
+
+    NextReadyTime = GetWorld()->GetTimeSeconds() + LocalCooldown;
+    SetActorBlockedState(ControlledActor, false);
+
+    GetWorldTimerManager().ClearTimer(RestoreTimer);
+    if (RestoreDelay > 0.0f)
+    {
+        GetWorldTimerManager().SetTimer(RestoreTimer, this, &AGMPlatformCollapse::RestorePlatform, RestoreDelay, false);
+    }
 }
 
 void AGMPlatformCollapse::RestorePlatform()
 {
-    if (!IsValid(TargetPlatform))
-    {
-        return;
-    }
-
-    TargetPlatform->SetActorHiddenInGame(bInitialHiddenInGame);
-    TargetPlatform->SetActorEnableCollision(bInitialCollisionEnabled);
-    bCollapsed = false;
-    SnapHelperToTarget();
-}
-
-bool AGMPlatformCollapse::IsCollapsed() const
-{
-    return bCollapsed;
+    SetActorBlockedState(GetControlledActor(), true);
 }

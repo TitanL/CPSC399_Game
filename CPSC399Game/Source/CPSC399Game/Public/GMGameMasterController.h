@@ -15,20 +15,12 @@ public:
     virtual void BeginPlay() override;
     virtual void SetupInputComponent() override;
 
-protected:
+private:
     UPROPERTY()
-    AGMGameMasterDirector* Director;
+    AGMGameMasterDirector* Director = nullptr;
 
-    bool FindDirectorIfNeeded();
-
-    void HandlePreviousPlatform();
-    void HandleNextPlatform();
-    void HandleRaisePlatform();
-    void HandleLowerPlatform();
-    void HandleFreezePlatform();
-    void HandleCollapsePlatform();
-    void HandlePreviousSpin();
-    void HandleNextSpin();
-    void HandleIncreaseSpinSpeed();
-    void HandleResetPlatform();
+    void FindDirector();
+    void HandleSlot1();
+    void HandleSlot2();
+    void HandleSlot3();
 };

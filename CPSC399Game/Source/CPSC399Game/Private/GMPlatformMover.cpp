@@ -1,77 +1,104 @@
 #include "GMPlatformMover.h"
 
-#include "Components/SceneComponent.h"
+#include "TimerManager.h"
 
 AGMPlatformMover::AGMPlatformMover()
 {
-    PrimaryActorTick.bCanEverTick = false;
-
-    SceneRoot = CreateDefaultSubobject<USceneComponent>(TEXT("SceneRoot"));
-    RootComponent = SceneRoot;
-
-    TargetPlatform = nullptr;
-    MoveStep = 150.0f;
-    InitialPlatformLocation = FVector::ZeroVector;
-}
-
-void AGMPlatformMover::OnConstruction(const FTransform& Transform)
-{
-    Super::OnConstruction(Transform);
-    SnapHelperToTarget();
+    PrimaryActorTick.bCanEverTick = true;
 }
 
 void AGMPlatformMover::BeginPlay()
 {
     Super::BeginPlay();
 
-    if (IsValid(TargetPlatform))
+    if (AActor* ControlledActor = GetControlledActor())
     {
-        InitialPlatformLocation = TargetPlatform->GetActorLocation();
-        SnapHelperToTarget();
+        StartLocation = ControlledActor->GetActorLocation();
+        WantedLocation = StartLocation;
     }
 }
 
-void AGMPlatformMover::SnapHelperToTarget()
+void AGMPlatformMover::Tick(float DeltaSeconds)
 {
-    if (IsValid(TargetPlatform))
+    Super::Tick(DeltaSeconds);
+
+    AActor* ControlledActor = GetControlledActor();
+    if (!IsValid(ControlledActor))
     {
-        SetActorLocation(TargetPlatform->GetActorLocation());
+        return;
     }
+
+    const FVector CurrentLocation = ControlledActor->GetActorLocation();
+    const FVector NewLocation = FMath::VInterpTo(CurrentLocation, WantedLocation, DeltaSeconds, MoveInterpSpeed);
+    ControlledActor->SetActorLocation(NewLocation);
+}
+
+AActor* AGMPlatformMover::GetControlledActor() const
+{
+    return IsValid(TargetPlatform) ? TargetPlatform : const_cast<AGMPlatformMover*>(this);
+}
+
+AActor* AGMPlatformMover::GetFocusActor() const
+{
+    return GetControlledActor();
+}
+
+bool AGMPlatformMover::IsOnLocalCooldown() const
+{
+    const UWorld* World = GetWorld();
+    return World && World->GetTimeSeconds() < NextReadyTime;
+}
+
+bool AGMPlatformMover::CanTrigger() const
+{
+    return IsValid(GetControlledActor()) && !IsOnLocalCooldown();
+}
+
+void AGMPlatformMover::SetWantedOffset(const FVector& NewOffset)
+{
+    AActor* ControlledActor = GetControlledActor();
+    if (!IsValid(ControlledActor))
+    {
+        return;
+    }
+
+    GetWorldTimerManager().ClearTimer(ResetTimer);
+    WantedLocation = StartLocation + NewOffset;
+
+    if (ActiveDuration > 0.0f)
+    {
+        GetWorldTimerManager().SetTimer(ResetTimer, this, &AGMPlatformMover::ResetPlatform, ActiveDuration, false);
+    }
+}
+
+void AGMPlatformMover::TriggerPlatform()
+{
+    if (!CanTrigger())
+    {
+        return;
+    }
+
+    NextReadyTime = GetWorld()->GetTimeSeconds() + LocalCooldown;
+    SetWantedOffset(MoveOffset);
 }
 
 void AGMPlatformMover::RaisePlatform()
 {
-    if (!IsValid(TargetPlatform))
-    {
-        return;
-    }
-
-    FVector NewLocation = TargetPlatform->GetActorLocation();
-    NewLocation.Z += MoveStep;
-    TargetPlatform->SetActorLocation(NewLocation);
-    SnapHelperToTarget();
+    TriggerPlatform();
 }
 
 void AGMPlatformMover::LowerPlatform()
 {
-    if (!IsValid(TargetPlatform))
+    if (!CanTrigger())
     {
         return;
     }
 
-    FVector NewLocation = TargetPlatform->GetActorLocation();
-    NewLocation.Z -= MoveStep;
-    TargetPlatform->SetActorLocation(NewLocation);
-    SnapHelperToTarget();
+    NextReadyTime = GetWorld()->GetTimeSeconds() + LocalCooldown;
+    SetWantedOffset(-MoveOffset);
 }
 
 void AGMPlatformMover::ResetPlatform()
 {
-    if (!IsValid(TargetPlatform))
-    {
-        return;
-    }
-
-    TargetPlatform->SetActorLocation(InitialPlatformLocation);
-    SnapHelperToTarget();
+    WantedLocation = StartLocation;
 }

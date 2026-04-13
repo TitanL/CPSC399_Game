@@ -4,38 +4,44 @@
 #include "GameFramework/Actor.h"
 #include "GMGameMasterDirector.generated.h"
 
+class ACharacter;
 class AGMPlatformMover;
 class AGMPlatformCollapse;
-class AGMIceZone;
 class AGMSpinObstacle;
-class USceneComponent;
-class UTextRenderComponent;
+
+UENUM(BlueprintType)
+enum class EGMControlType : uint8
+{
+    None,
+    Mover,
+    Collapse,
+    Spin
+};
 
 USTRUCT(BlueprintType)
-struct FGMPlatformControlEntry
+struct FGMControlSlot
 {
     GENERATED_BODY()
 
-public:
-    FGMPlatformControlEntry()
-        : TargetPlatform(nullptr)
-        , Mover(nullptr)
-        , Collapse(nullptr)
-        , IceZone(nullptr)
-    {
-    }
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "GM")
+    EGMControlType ControlType = EGMControlType::None;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "GM")
-    AActor* TargetPlatform;
+    AActor* FocusActor = nullptr;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "GM")
-    AGMPlatformMover* Mover;
+    FString DisplayName;
+};
 
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "GM")
-    AGMPlatformCollapse* Collapse;
-
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "GM")
-    AGMIceZone* IceZone;
+struct FGMInternalSlot
+{
+    EGMControlType ControlType = EGMControlType::None;
+    TWeakObjectPtr<AActor> FocusActor;
+    TWeakObjectPtr<AGMPlatformMover> Mover;
+    TWeakObjectPtr<AGMPlatformCollapse> Collapse;
+    TWeakObjectPtr<AGMSpinObstacle> Spin;
+    float Progress = 0.0f;
+    FString DisplayName;
 };
 
 UCLASS()
@@ -47,65 +53,68 @@ public:
     AGMGameMasterDirector();
 
     virtual void BeginPlay() override;
+    virtual void Tick(float DeltaSeconds) override;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GM|Track")
+    FVector TrackOrigin = FVector::ZeroVector;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GM|Track")
+    FVector TrackForward = FVector(1.0f, 0.0f, 0.0f);
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GM|Track")
+    float PassedTargetTolerance = 75.0f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GM|Slots")
+    int32 MaxActiveSlots = 3;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GM|Cooldown")
+    float GlobalActionCooldown = 5.0f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GM|Debug")
+    bool bShowSlotDebugOnScreen = true;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GM|Debug")
+    float SlotRefreshInterval = 0.15f;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "GM|Slots")
+    TArray<FGMControlSlot> CurrentSlots;
 
     UFUNCTION(BlueprintCallable, Category = "GM")
-    void RefreshTargets();
+    void TriggerSlot1();
 
     UFUNCTION(BlueprintCallable, Category = "GM")
-    void SelectPreviousPlatform();
+    void TriggerSlot2();
 
     UFUNCTION(BlueprintCallable, Category = "GM")
-    void SelectNextPlatform();
+    void TriggerSlot3();
 
     UFUNCTION(BlueprintCallable, Category = "GM")
-    void RaiseSelectedPlatform();
+    void ForceRefreshTargets();
 
-    UFUNCTION(BlueprintCallable, Category = "GM")
-    void LowerSelectedPlatform();
+    UFUNCTION(BlueprintPure, Category = "GM")
+    float GetHighestRunnerProgressReached() const
+    {
+        return HighestRunnerProgressReached;
+    }
 
-    UFUNCTION(BlueprintCallable, Category = "GM")
-    void FreezeSelectedPlatform();
+private:
+    TArray<AGMPlatformMover*> PlatformMoverHelpers;
+    TArray<AGMPlatformCollapse*> PlatformCollapseHelpers;
+    TArray<AGMSpinObstacle*> SpinHelpers;
 
-    UFUNCTION(BlueprintCallable, Category = "GM")
-    void CollapseSelectedPlatform();
+    TArray<FGMInternalSlot> LiveSlots;
 
-    UFUNCTION(BlueprintCallable, Category = "GM")
-    void ResetSelectedPlatform();
+    float NextGlobalReadyTime = 0.0f;
+    float HighestRunnerProgressReached = -FLT_MAX;
+    float NextSlotRefreshTime = 0.0f;
 
-    UFUNCTION(BlueprintCallable, Category = "GM")
-    void SelectPreviousSpin();
-
-    UFUNCTION(BlueprintCallable, Category = "GM")
-    void SelectNextSpin();
-
-    UFUNCTION(BlueprintCallable, Category = "GM")
-    void IncreaseSelectedSpinSpeed();
-
-protected:
-    UPROPERTY(VisibleAnywhere, Category = "GM")
-    USceneComponent* SceneRoot;
-
-    UPROPERTY(VisibleAnywhere, Category = "GM")
-    UTextRenderComponent* PlatformSelectionText;
-
-    UPROPERTY(VisibleAnywhere, Category = "GM")
-    UTextRenderComponent* SpinSelectionText;
-
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "GM")
-    TArray<FGMPlatformControlEntry> PlatformTargets;
-
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "GM")
-    TArray<AGMSpinObstacle*> SpinTargets;
-
-    int32 SelectedPlatformIndex;
-    int32 SelectedSpinIndex;
-
-    int32 FindOrAddPlatformEntry(AActor* TargetPlatform);
-    void SortPlatformTargetsByName();
-    void SortSpinTargetsByName();
-    void UpdatePlatformHighlight();
-    void UpdateSpinHighlight();
+    void RefreshHelperCaches();
+    void UpdateLiveSlots();
+    void DrawSlotDebug() const;
     void ShowStatusMessage(const FString& Message) const;
-    FString GetPlatformDisplayName(const FGMPlatformControlEntry& Entry) const;
-    FString GetSpinDisplayName(AGMSpinObstacle* SpinHelper) const;
+    void TriggerSlotByIndex(int32 SlotIndex);
+
+    ACharacter* GetLeadRunner() const;
+    float GetProgressAlongTrack(const FVector& WorldLocation) const;
+    FString GetControlTypeName(EGMControlType ControlType) const;
 };

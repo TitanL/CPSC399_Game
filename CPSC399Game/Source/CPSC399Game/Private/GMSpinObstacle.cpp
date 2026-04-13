@@ -1,63 +1,100 @@
 #include "GMSpinObstacle.h"
 
 #include "Components/SceneComponent.h"
+#include "TimerManager.h"
 
 AGMSpinObstacle::AGMSpinObstacle()
 {
     PrimaryActorTick.bCanEverTick = true;
 
     SceneRoot = CreateDefaultSubobject<USceneComponent>(TEXT("SceneRoot"));
-    RootComponent = SceneRoot;
-
-    TargetObstacle = nullptr;
-    InitialSpinSpeed = 90.0f;
-    SpinSpeedStep = 45.0f;
-    bClockwise = true;
-    CurrentSpinSpeed = InitialSpinSpeed;
-}
-
-void AGMSpinObstacle::OnConstruction(const FTransform& Transform)
-{
-    Super::OnConstruction(Transform);
-    SnapHelperToTarget();
+    SetRootComponent(SceneRoot);
 }
 
 void AGMSpinObstacle::BeginPlay()
 {
     Super::BeginPlay();
 
-    CurrentSpinSpeed = InitialSpinSpeed;
-    SnapHelperToTarget();
+    StoredSpinSpeedBeforeBoost = CurrentSpinSpeed;
 }
 
-void AGMSpinObstacle::Tick(float DeltaTime)
+void AGMSpinObstacle::Tick(float DeltaSeconds)
 {
-    Super::Tick(DeltaTime);
+    Super::Tick(DeltaSeconds);
 
-    if (!IsValid(TargetObstacle))
+    AActor* ControlledActor = GetControlledActor();
+    if (!IsValid(ControlledActor))
     {
         return;
     }
 
-    const float Direction = bClockwise ? 1.0f : -1.0f;
-    const float DeltaYaw = CurrentSpinSpeed * Direction * DeltaTime;
-    TargetObstacle->AddActorLocalRotation(FRotator(0.0f, DeltaYaw, 0.0f));
-}
-
-void AGMSpinObstacle::SnapHelperToTarget()
-{
-    if (IsValid(TargetObstacle))
+    if (FMath::IsNearlyZero(CurrentSpinSpeed))
     {
-        SetActorLocation(TargetObstacle->GetActorLocation());
+        return;
     }
+
+    const FVector SafeAxis = SpinAxis.GetSafeNormal();
+    if (SafeAxis.IsNearlyZero())
+    {
+        return;
+    }
+
+    const float AngleRadians = FMath::DegreesToRadians(CurrentSpinSpeed * DeltaSeconds);
+    const FQuat DeltaQuat(SafeAxis, AngleRadians);
+    ControlledActor->AddActorWorldRotation(DeltaQuat);
 }
 
-void AGMSpinObstacle::IncreaseSpinSpeed()
+AActor* AGMSpinObstacle::GetControlledActor() const
 {
-    CurrentSpinSpeed += SpinSpeedStep;
+    return IsValid(TargetObstacle) ? TargetObstacle : const_cast<AGMSpinObstacle*>(this);
+}
+
+AActor* AGMSpinObstacle::GetFocusActor() const
+{
+    return GetControlledActor();
+}
+
+bool AGMSpinObstacle::IsOnLocalCooldown() const
+{
+    const UWorld* World = GetWorld();
+    return World && World->GetTimeSeconds() < NextReadyTime;
+}
+
+bool AGMSpinObstacle::CanTrigger() const
+{
+    return IsValid(GetControlledActor()) && !IsOnLocalCooldown() && !bBoostActive;
 }
 
 float AGMSpinObstacle::GetCurrentSpinSpeed() const
 {
     return CurrentSpinSpeed;
+}
+
+void AGMSpinObstacle::TriggerSpinBoost()
+{
+    if (!CanTrigger())
+    {
+        return;
+    }
+
+    StoredSpinSpeedBeforeBoost = CurrentSpinSpeed;
+    CurrentSpinSpeed += SpeedIncreaseAmount;
+
+    bBoostActive = true;
+    NextReadyTime = GetWorld()->GetTimeSeconds() + LocalCooldown;
+
+    GetWorldTimerManager().ClearTimer(ResetSpinTimer);
+    GetWorldTimerManager().SetTimer(
+        ResetSpinTimer,
+        this,
+        &AGMSpinObstacle::ResetSpinSpeed,
+        ResetDelay,
+        false
+    );
+}
+
+void AGMSpinObstacle::ResetSpinSpeed()
+{
+    CurrentSpinSpeed = StoredSpinSpeedBeforeBoost;
+    bBoostActive = false;
 }

@@ -4,8 +4,6 @@
 #include "GameFramework/Actor.h"
 #include "GMPlatformMover.generated.h"
 
-class USceneComponent;
-
 UCLASS()
 class CPSC399GAME_API AGMPlatformMover : public AActor
 {
@@ -15,13 +13,25 @@ public:
     AGMPlatformMover();
 
     virtual void BeginPlay() override;
-    virtual void OnConstruction(const FTransform& Transform) override;
+    virtual void Tick(float DeltaSeconds) override;
 
-    UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "GM")
-    AActor* TargetPlatform;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GM")
+    AActor* TargetPlatform = nullptr;
 
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "GM")
-    float MoveStep;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GM")
+    FVector MoveOffset = FVector(0.0f, 0.0f, 250.0f);
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GM")
+    float MoveInterpSpeed = 5.0f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GM")
+    float ActiveDuration = 3.0f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GM")
+    float LocalCooldown = 5.0f;
+
+    UFUNCTION(BlueprintCallable, Category = "GM")
+    void TriggerPlatform();
 
     UFUNCTION(BlueprintCallable, Category = "GM")
     void RaisePlatform();
@@ -32,11 +42,21 @@ public:
     UFUNCTION(BlueprintCallable, Category = "GM")
     void ResetPlatform();
 
-protected:
-    UPROPERTY(VisibleAnywhere, Category = "GM")
-    USceneComponent* SceneRoot;
+    UFUNCTION(BlueprintPure, Category = "GM")
+    bool CanTrigger() const;
 
-    FVector InitialPlatformLocation;
+    UFUNCTION(BlueprintPure, Category = "GM")
+    bool IsOnLocalCooldown() const;
 
-    void SnapHelperToTarget();
+    UFUNCTION(BlueprintPure, Category = "GM")
+    AActor* GetFocusActor() const;
+
+private:
+    FVector StartLocation = FVector::ZeroVector;
+    FVector WantedLocation = FVector::ZeroVector;
+    float NextReadyTime = 0.0f;
+    FTimerHandle ResetTimer;
+
+    AActor* GetControlledActor() const;
+    void SetWantedOffset(const FVector& NewOffset);
 };

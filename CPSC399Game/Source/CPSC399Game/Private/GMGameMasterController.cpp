@@ -1,13 +1,12 @@
 #include "GMGameMasterController.h"
 
 #include "GMGameMasterDirector.h"
-#include "InputCoreTypes.h"
 #include "Kismet/GameplayStatics.h"
 
 void AGMGameMasterController::BeginPlay()
 {
     Super::BeginPlay();
-    FindDirectorIfNeeded();
+    FindDirector();
 }
 
 void AGMGameMasterController::SetupInputComponent()
@@ -19,23 +18,16 @@ void AGMGameMasterController::SetupInputComponent()
         return;
     }
 
-    InputComponent->BindKey(EKeys::One, IE_Pressed, this, &AGMGameMasterController::HandlePreviousPlatform);
-    InputComponent->BindKey(EKeys::Two, IE_Pressed, this, &AGMGameMasterController::HandleNextPlatform);
-    InputComponent->BindKey(EKeys::Three, IE_Pressed, this, &AGMGameMasterController::HandleRaisePlatform);
-    InputComponent->BindKey(EKeys::Four, IE_Pressed, this, &AGMGameMasterController::HandleLowerPlatform);
-    InputComponent->BindKey(EKeys::Five, IE_Pressed, this, &AGMGameMasterController::HandleFreezePlatform);
-    InputComponent->BindKey(EKeys::Six, IE_Pressed, this, &AGMGameMasterController::HandleCollapsePlatform);
-    InputComponent->BindKey(EKeys::Seven, IE_Pressed, this, &AGMGameMasterController::HandlePreviousSpin);
-    InputComponent->BindKey(EKeys::Eight, IE_Pressed, this, &AGMGameMasterController::HandleNextSpin);
-    InputComponent->BindKey(EKeys::Nine, IE_Pressed, this, &AGMGameMasterController::HandleIncreaseSpinSpeed);
-    InputComponent->BindKey(EKeys::Zero, IE_Pressed, this, &AGMGameMasterController::HandleResetPlatform);
+    InputComponent->BindAction("GM_Slot1", IE_Pressed, this, &AGMGameMasterController::HandleSlot1);
+    InputComponent->BindAction("GM_Slot2", IE_Pressed, this, &AGMGameMasterController::HandleSlot2);
+    InputComponent->BindAction("GM_Slot3", IE_Pressed, this, &AGMGameMasterController::HandleSlot3);
 }
 
-bool AGMGameMasterController::FindDirectorIfNeeded()
+void AGMGameMasterController::FindDirector()
 {
     if (IsValid(Director))
     {
-        return true;
+        return;
     }
 
     TArray<AActor*> FoundActors;
@@ -45,86 +37,31 @@ bool AGMGameMasterController::FindDirectorIfNeeded()
     {
         Director = Cast<AGMGameMasterDirector>(FoundActors[0]);
     }
-
-    return IsValid(Director);
 }
 
-void AGMGameMasterController::HandlePreviousPlatform()
+void AGMGameMasterController::HandleSlot1()
 {
-    if (FindDirectorIfNeeded())
+    FindDirector();
+    if (IsValid(Director))
     {
-        Director->SelectPreviousPlatform();
+        Director->TriggerSlot1();
     }
 }
 
-void AGMGameMasterController::HandleNextPlatform()
+void AGMGameMasterController::HandleSlot2()
 {
-    if (FindDirectorIfNeeded())
+    FindDirector();
+    if (IsValid(Director))
     {
-        Director->SelectNextPlatform();
+        Director->TriggerSlot2();
     }
 }
 
-void AGMGameMasterController::HandleRaisePlatform()
+void AGMGameMasterController::HandleSlot3()
 {
-    if (FindDirectorIfNeeded())
+    FindDirector();
+    if (IsValid(Director))
     {
-        Director->RaiseSelectedPlatform();
-    }
-}
-
-void AGMGameMasterController::HandleLowerPlatform()
-{
-    if (FindDirectorIfNeeded())
-    {
-        Director->LowerSelectedPlatform();
-    }
-}
-
-void AGMGameMasterController::HandleFreezePlatform()
-{
-    if (FindDirectorIfNeeded())
-    {
-        Director->FreezeSelectedPlatform();
-    }
-}
-
-void AGMGameMasterController::HandleCollapsePlatform()
-{
-    if (FindDirectorIfNeeded())
-    {
-        Director->CollapseSelectedPlatform();
-    }
-}
-
-void AGMGameMasterController::HandlePreviousSpin()
-{
-    if (FindDirectorIfNeeded())
-    {
-        Director->SelectPreviousSpin();
-    }
-}
-
-void AGMGameMasterController::HandleNextSpin()
-{
-    if (FindDirectorIfNeeded())
-    {
-        Director->SelectNextSpin();
-    }
-}
-
-void AGMGameMasterController::HandleIncreaseSpinSpeed()
-{
-    if (FindDirectorIfNeeded())
-    {
-        Director->IncreaseSelectedSpinSpeed();
-    }
-}
-
-void AGMGameMasterController::HandleResetPlatform()
-{
-    if (FindDirectorIfNeeded())
-    {
-        Director->ResetSelectedPlatform();
+        Director->TriggerSlot3();
     }
 }

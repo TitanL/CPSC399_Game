@@ -1,482 +1,411 @@
 #include "GMGameMasterDirector.h"
 
-#include "Camera/PlayerCameraManager.h"
-#include "Components/SceneComponent.h"
-#include "Components/TextRenderComponent.h"
 #include "Engine/Engine.h"
-#include "GameFramework/PlayerController.h"
-#include "Kismet/GameplayStatics.h"
-
-#include "GMIceZone.h"
+#include "GameFramework/Character.h"
 #include "GMPlatformCollapse.h"
 #include "GMPlatformMover.h"
 #include "GMSpinObstacle.h"
-
-static FString GetSafeActorDebugName(const AActor* Actor)
-{
-    return IsValid(Actor) ? Actor->GetName() : FString(TEXT("None"));
-}
+#include "Kismet/GameplayStatics.h"
 
 AGMGameMasterDirector::AGMGameMasterDirector()
 {
-    PrimaryActorTick.bCanEverTick = false;
-
-    SceneRoot = CreateDefaultSubobject<USceneComponent>(TEXT("SceneRoot"));
-    RootComponent = SceneRoot;
-
-    PlatformSelectionText = CreateDefaultSubobject<UTextRenderComponent>(TEXT("PlatformSelectionText"));
-    PlatformSelectionText->SetupAttachment(SceneRoot);
-    PlatformSelectionText->SetHorizontalAlignment(EHorizTextAligment::EHTA_Center);
-    PlatformSelectionText->SetWorldSize(60.0f);
-    PlatformSelectionText->SetTextRenderColor(FColor::Green);
-    PlatformSelectionText->SetHiddenInGame(true);
-
-    SpinSelectionText = CreateDefaultSubobject<UTextRenderComponent>(TEXT("SpinSelectionText"));
-    SpinSelectionText->SetupAttachment(SceneRoot);
-    SpinSelectionText->SetHorizontalAlignment(EHorizTextAligment::EHTA_Center);
-    SpinSelectionText->SetWorldSize(60.0f);
-    SpinSelectionText->SetTextRenderColor(FColor::Yellow);
-    SpinSelectionText->SetHiddenInGame(true);
-
-    SelectedPlatformIndex = 0;
-    SelectedSpinIndex = 0;
+    PrimaryActorTick.bCanEverTick = true;
 }
 
 void AGMGameMasterDirector::BeginPlay()
 {
     Super::BeginPlay();
-    RefreshTargets();
+
+    RefreshHelperCaches();
+    UpdateLiveSlots();
 }
 
-void AGMGameMasterDirector::RefreshTargets()
+void AGMGameMasterDirector::Tick(float DeltaSeconds)
 {
-    PlatformTargets.Empty();
-    SpinTargets.Empty();
+    Super::Tick(DeltaSeconds);
 
-    TArray<AActor*> FoundMovers;
-    UGameplayStatics::GetAllActorsOfClass(GetWorld(), AGMPlatformMover::StaticClass(), FoundMovers);
-
-    for (AActor* Actor : FoundMovers)
+    ACharacter* LeadRunner = GetLeadRunner();
+    if (IsValid(LeadRunner))
     {
-        AGMPlatformMover* Mover = Cast<AGMPlatformMover>(Actor);
-        if (!IsValid(Mover) || !IsValid(Mover->TargetPlatform))
+        const float LeadProgress = GetProgressAlongTrack(LeadRunner->GetActorLocation());
+        HighestRunnerProgressReached = FMath::Max(HighestRunnerProgressReached, LeadProgress);
+    }
+
+    const float Now = GetWorld()->GetTimeSeconds();
+    if (Now >= NextSlotRefreshTime)
+    {
+        UpdateLiveSlots();
+        NextSlotRefreshTime = Now + FMath::Max(0.01f, SlotRefreshInterval);
+    }
+
+    if (bShowSlotDebugOnScreen)
+    {
+        DrawSlotDebug();
+    }
+}
+
+void AGMGameMasterDirector::RefreshHelperCaches()
+{
+    PlatformMoverHelpers.Empty();
+    PlatformCollapseHelpers.Empty();
+    SpinHelpers.Empty();
+
+    TArray<AActor*> FoundActors;
+
+    UGameplayStatics::GetAllActorsOfClass(GetWorld(), AGMPlatformMover::StaticClass(), FoundActors);
+    for (AActor* Actor : FoundActors)
+    {
+        if (AGMPlatformMover* Helper = Cast<AGMPlatformMover>(Actor))
+        {
+            PlatformMoverHelpers.Add(Helper);
+        }
+    }
+
+    FoundActors.Empty();
+    UGameplayStatics::GetAllActorsOfClass(GetWorld(), AGMPlatformCollapse::StaticClass(), FoundActors);
+    for (AActor* Actor : FoundActors)
+    {
+        if (AGMPlatformCollapse* Helper = Cast<AGMPlatformCollapse>(Actor))
+        {
+            PlatformCollapseHelpers.Add(Helper);
+        }
+    }
+
+    FoundActors.Empty();
+    UGameplayStatics::GetAllActorsOfClass(GetWorld(), AGMSpinObstacle::StaticClass(), FoundActors);
+    for (AActor* Actor : FoundActors)
+    {
+        if (AGMSpinObstacle* Helper = Cast<AGMSpinObstacle>(Actor))
+        {
+            SpinHelpers.Add(Helper);
+        }
+    }
+}
+
+ACharacter* AGMGameMasterDirector::GetLeadRunner() const
+{
+    TArray<AActor*> FoundActors;
+    UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACharacter::StaticClass(), FoundActors);
+
+    ACharacter* BestRunner = nullptr;
+    float BestProgress = -FLT_MAX;
+
+    for (AActor* Actor : FoundActors)
+    {
+        ACharacter* Character = Cast<ACharacter>(Actor);
+        if (!IsValid(Character))
         {
             continue;
         }
 
-        const int32 Index = FindOrAddPlatformEntry(Mover->TargetPlatform);
-        if (!PlatformTargets[Index].Mover)
+        const float Progress = GetProgressAlongTrack(Character->GetActorLocation());
+        if (Progress > BestProgress)
         {
-            PlatformTargets[Index].Mover = Mover;
+            BestProgress = Progress;
+            BestRunner = Character;
         }
     }
 
-    TArray<AActor*> FoundCollapses;
-    UGameplayStatics::GetAllActorsOfClass(GetWorld(), AGMPlatformCollapse::StaticClass(), FoundCollapses);
+    return BestRunner;
+}
 
-    for (AActor* Actor : FoundCollapses)
+float AGMGameMasterDirector::GetProgressAlongTrack(const FVector& WorldLocation) const
+{
+    const FVector SafeForward = TrackForward.GetSafeNormal();
+    return FVector::DotProduct(WorldLocation - TrackOrigin, SafeForward);
+}
+
+FString AGMGameMasterDirector::GetControlTypeName(EGMControlType ControlType) const
+{
+    switch (ControlType)
     {
-        AGMPlatformCollapse* Collapse = Cast<AGMPlatformCollapse>(Actor);
-        if (!IsValid(Collapse) || !IsValid(Collapse->TargetPlatform))
+    case EGMControlType::Mover:
+        return TEXT("Move");
+    case EGMControlType::Collapse:
+        return TEXT("Collapse");
+    case EGMControlType::Spin:
+        return TEXT("Spin");
+    default:
+        return TEXT("None");
+    }
+}
+
+void AGMGameMasterDirector::UpdateLiveSlots()
+{
+    LiveSlots.Empty();
+    CurrentSlots.Empty();
+
+    if (HighestRunnerProgressReached <= -FLT_MAX / 2.0f)
+    {
+        return;
+    }
+
+    const float LockedBehindProgress = HighestRunnerProgressReached - PassedTargetTolerance;
+    TArray<FGMInternalSlot> Candidates;
+
+    for (AGMPlatformMover* Helper : PlatformMoverHelpers)
+    {
+        if (!IsValid(Helper))
         {
             continue;
         }
 
-        const int32 Index = FindOrAddPlatformEntry(Collapse->TargetPlatform);
-        if (!PlatformTargets[Index].Collapse)
-        {
-            PlatformTargets[Index].Collapse = Collapse;
-        }
-    }
-
-    TArray<AActor*> FoundIceZones;
-    UGameplayStatics::GetAllActorsOfClass(GetWorld(), AGMIceZone::StaticClass(), FoundIceZones);
-
-    for (AActor* Actor : FoundIceZones)
-    {
-        AGMIceZone* IceZone = Cast<AGMIceZone>(Actor);
-        if (!IsValid(IceZone) || !IsValid(IceZone->TargetPlatform))
+        AActor* FocusActor = Helper->GetFocusActor();
+        if (!IsValid(FocusActor))
         {
             continue;
         }
 
-        const int32 Index = FindOrAddPlatformEntry(IceZone->TargetPlatform);
-        if (!PlatformTargets[Index].IceZone)
+        const float Progress = GetProgressAlongTrack(FocusActor->GetActorLocation());
+        if (Progress < LockedBehindProgress)
         {
-            PlatformTargets[Index].IceZone = IceZone;
+            continue;
         }
+
+        FGMInternalSlot Slot;
+        Slot.ControlType = EGMControlType::Mover;
+        Slot.FocusActor = FocusActor;
+        Slot.Mover = Helper;
+        Slot.Progress = Progress;
+        Slot.DisplayName = FocusActor->GetName();
+        Candidates.Add(Slot);
     }
 
-    TArray<AActor*> FoundSpinners;
-    UGameplayStatics::GetAllActorsOfClass(GetWorld(), AGMSpinObstacle::StaticClass(), FoundSpinners);
-
-    for (AActor* Actor : FoundSpinners)
+    for (AGMPlatformCollapse* Helper : PlatformCollapseHelpers)
     {
-        AGMSpinObstacle* SpinHelper = Cast<AGMSpinObstacle>(Actor);
-        if (IsValid(SpinHelper))
+        if (!IsValid(Helper))
         {
-            SpinTargets.Add(SpinHelper);
+            continue;
         }
+
+        AActor* FocusActor = Helper->GetFocusActor();
+        if (!IsValid(FocusActor))
+        {
+            continue;
+        }
+
+        const float Progress = GetProgressAlongTrack(FocusActor->GetActorLocation());
+        if (Progress < LockedBehindProgress)
+        {
+            continue;
+        }
+
+        FGMInternalSlot Slot;
+        Slot.ControlType = EGMControlType::Collapse;
+        Slot.FocusActor = FocusActor;
+        Slot.Collapse = Helper;
+        Slot.Progress = Progress;
+        Slot.DisplayName = FocusActor->GetName();
+        Candidates.Add(Slot);
     }
 
-    SortPlatformTargetsByName();
-    SortSpinTargetsByName();
-
-    if (PlatformTargets.Num() == 0)
+    for (AGMSpinObstacle* Helper : SpinHelpers)
     {
-        SelectedPlatformIndex = 0;
-        PlatformSelectionText->SetHiddenInGame(true);
+        if (!IsValid(Helper))
+        {
+            continue;
+        }
+
+        AActor* FocusActor = Helper->GetFocusActor();
+        if (!IsValid(FocusActor))
+        {
+            continue;
+        }
+
+        const float Progress = GetProgressAlongTrack(FocusActor->GetActorLocation());
+        if (Progress < LockedBehindProgress)
+        {
+            continue;
+        }
+
+        FGMInternalSlot Slot;
+        Slot.ControlType = EGMControlType::Spin;
+        Slot.FocusActor = FocusActor;
+        Slot.Spin = Helper;
+        Slot.Progress = Progress;
+        Slot.DisplayName = FocusActor->GetName();
+        Candidates.Add(Slot);
+    }
+
+    Candidates.Sort([](const FGMInternalSlot& A, const FGMInternalSlot& B)
+        {
+            return A.Progress < B.Progress;
+        });
+
+    TSet<AActor*> UsedFocusActors;
+
+    for (const FGMInternalSlot& Candidate : Candidates)
+    {
+        if (LiveSlots.Num() >= FMath::Max(1, MaxActiveSlots))
+        {
+            break;
+        }
+
+        AActor* FocusActor = Candidate.FocusActor.Get();
+        if (!IsValid(FocusActor))
+        {
+            continue;
+        }
+
+        if (UsedFocusActors.Contains(FocusActor))
+        {
+            continue;
+        }
+
+        UsedFocusActors.Add(FocusActor);
+        LiveSlots.Add(Candidate);
+
+        FGMControlSlot PublicSlot;
+        PublicSlot.ControlType = Candidate.ControlType;
+        PublicSlot.FocusActor = FocusActor;
+        PublicSlot.DisplayName = Candidate.DisplayName;
+        CurrentSlots.Add(PublicSlot);
+    }
+}
+
+void AGMGameMasterDirector::DrawSlotDebug() const
+{
+    if (!GEngine)
+    {
+        return;
+    }
+
+    for (int32 i = 0; i < 3; ++i)
+    {
+        FString Message = FString::Printf(TEXT("%d: Empty"), i + 1);
+
+        if (CurrentSlots.IsValidIndex(i))
+        {
+            Message = FString::Printf(
+                TEXT("%d: %s | %s"),
+                i + 1,
+                *GetControlTypeName(CurrentSlots[i].ControlType),
+                *CurrentSlots[i].DisplayName
+            );
+        }
+
+        GEngine->AddOnScreenDebugMessage(700 + i, 0.0f, FColor::Cyan, Message);
+    }
+
+    if (GetWorld()->GetTimeSeconds() < NextGlobalReadyTime)
+    {
+        const float Remaining = NextGlobalReadyTime - GetWorld()->GetTimeSeconds();
+        GEngine->AddOnScreenDebugMessage(
+            710,
+            0.0f,
+            FColor::Yellow,
+            FString::Printf(TEXT("GM Cooldown: %.1fs"), Remaining)
+        );
     }
     else
     {
-        SelectedPlatformIndex = FMath::Clamp(SelectedPlatformIndex, 0, PlatformTargets.Num() - 1);
-        UpdatePlatformHighlight();
+        GEngine->AddOnScreenDebugMessage(710, 0.0f, FColor::Green, TEXT("GM Cooldown: Ready"));
     }
-
-    if (SpinTargets.Num() == 0)
-    {
-        SelectedSpinIndex = 0;
-        SpinSelectionText->SetHiddenInGame(true);
-    }
-    else
-    {
-        SelectedSpinIndex = FMath::Clamp(SelectedSpinIndex, 0, SpinTargets.Num() - 1);
-        UpdateSpinHighlight();
-    }
-}
-
-int32 AGMGameMasterDirector::FindOrAddPlatformEntry(AActor* TargetPlatform)
-{
-    for (int32 i = 0; i < PlatformTargets.Num(); ++i)
-    {
-        if (PlatformTargets[i].TargetPlatform == TargetPlatform)
-        {
-            return i;
-        }
-    }
-
-    FGMPlatformControlEntry NewEntry;
-    NewEntry.TargetPlatform = TargetPlatform;
-    return PlatformTargets.Add(NewEntry);
-}
-
-void AGMGameMasterDirector::SortPlatformTargetsByName()
-{
-    for (int32 i = 0; i < PlatformTargets.Num(); ++i)
-    {
-        for (int32 j = i + 1; j < PlatformTargets.Num(); ++j)
-        {
-            if (GetPlatformDisplayName(PlatformTargets[j]) < GetPlatformDisplayName(PlatformTargets[i]))
-            {
-                PlatformTargets.Swap(i, j);
-            }
-        }
-    }
-}
-
-void AGMGameMasterDirector::SortSpinTargetsByName()
-{
-    for (int32 i = 0; i < SpinTargets.Num(); ++i)
-    {
-        for (int32 j = i + 1; j < SpinTargets.Num(); ++j)
-        {
-            if (GetSpinDisplayName(SpinTargets[j]) < GetSpinDisplayName(SpinTargets[i]))
-            {
-                SpinTargets.Swap(i, j);
-            }
-        }
-    }
-}
-
-FString AGMGameMasterDirector::GetPlatformDisplayName(const FGMPlatformControlEntry& Entry) const
-{
-    if (IsValid(Entry.TargetPlatform))
-    {
-        return GetSafeActorDebugName(Entry.TargetPlatform);
-    }
-
-    return FString(TEXT("InvalidPlatform"));
-}
-
-FString AGMGameMasterDirector::GetSpinDisplayName(AGMSpinObstacle* SpinHelper) const
-{
-    if (IsValid(SpinHelper) && IsValid(SpinHelper->TargetObstacle))
-    {
-        return GetSafeActorDebugName(SpinHelper->TargetObstacle);
-    }
-
-    if (IsValid(SpinHelper))
-    {
-        return GetSafeActorDebugName(SpinHelper);
-    }
-
-    return FString(TEXT("InvalidSpinner"));
 }
 
 void AGMGameMasterDirector::ShowStatusMessage(const FString& Message) const
 {
     if (GEngine)
     {
-        GEngine->AddOnScreenDebugMessage(-1, 2.5f, FColor::White, Message);
+        GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::White, Message);
     }
 }
 
-void AGMGameMasterDirector::UpdatePlatformHighlight()
+void AGMGameMasterDirector::TriggerSlotByIndex(int32 SlotIndex)
 {
-    if (PlatformTargets.Num() == 0)
+    UpdateLiveSlots();
+
+    if (!LiveSlots.IsValidIndex(SlotIndex))
     {
-        PlatformSelectionText->SetHiddenInGame(true);
+        ShowStatusMessage(FString::Printf(TEXT("Slot %d is empty."), SlotIndex + 1));
         return;
     }
 
-    const FGMPlatformControlEntry& Entry = PlatformTargets[SelectedPlatformIndex];
-    if (!IsValid(Entry.TargetPlatform))
+    const float Now = GetWorld()->GetTimeSeconds();
+    if (Now < NextGlobalReadyTime)
     {
-        PlatformSelectionText->SetHiddenInGame(true);
+        ShowStatusMessage(FString::Printf(
+            TEXT("GM is on cooldown for %.1f more seconds."),
+            NextGlobalReadyTime - Now
+        ));
         return;
     }
 
-    FVector Center;
-    FVector Extents;
-    Entry.TargetPlatform->GetActorBounds(true, Center, Extents);
+    const FGMInternalSlot& Slot = LiveSlots[SlotIndex];
+    bool bActivated = false;
 
-    const FVector LabelLocation = Center + FVector(0.0f, 0.0f, Extents.Z + 120.0f);
-    PlatformSelectionText->SetWorldLocation(LabelLocation);
-    PlatformSelectionText->SetText(FText::FromString(FString::Printf(
-        TEXT("SELECTED PLATFORM\n%s"),
-        *GetPlatformDisplayName(Entry)
-    )));
-    PlatformSelectionText->SetHiddenInGame(false);
-
-    APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0);
-    if (IsValid(PC) && IsValid(PC->PlayerCameraManager))
+    switch (Slot.ControlType)
     {
-        FRotator FacingRotation = (PC->PlayerCameraManager->GetCameraLocation() - LabelLocation).Rotation();
-        FacingRotation.Pitch = 0.0f;
-        FacingRotation.Roll = 0.0f;
-        PlatformSelectionText->SetWorldRotation(FacingRotation);
+    case EGMControlType::Mover:
+    {
+        if (Slot.Mover.IsValid() && Slot.Mover->CanTrigger())
+        {
+            Slot.Mover->TriggerPlatform();
+            bActivated = true;
+        }
+        break;
     }
 
-    ShowStatusMessage(FString::Printf(TEXT("Selected platform: %s"), *GetPlatformDisplayName(Entry)));
-}
-
-void AGMGameMasterDirector::UpdateSpinHighlight()
-{
-    if (SpinTargets.Num() == 0)
+    case EGMControlType::Collapse:
     {
-        SpinSelectionText->SetHiddenInGame(true);
+        if (Slot.Collapse.IsValid() && Slot.Collapse->CanTrigger())
+        {
+            Slot.Collapse->CollapsePlatform();
+            bActivated = true;
+        }
+        break;
+    }
+
+    case EGMControlType::Spin:
+    {
+        if (Slot.Spin.IsValid() && Slot.Spin->CanTrigger())
+        {
+            Slot.Spin->TriggerSpinBoost();
+            bActivated = true;
+        }
+        break;
+    }
+
+    default:
+        break;
+    }
+
+    if (!bActivated)
+    {
+        ShowStatusMessage(FString::Printf(
+            TEXT("Slot %d is on local cooldown or invalid."),
+            SlotIndex + 1
+        ));
         return;
     }
 
-    AGMSpinObstacle* SpinHelper = SpinTargets[SelectedSpinIndex];
-    if (!IsValid(SpinHelper) || !IsValid(SpinHelper->TargetObstacle))
-    {
-        SpinSelectionText->SetHiddenInGame(true);
-        return;
-    }
-
-    FVector Center;
-    FVector Extents;
-    SpinHelper->TargetObstacle->GetActorBounds(true, Center, Extents);
-
-    const FVector LabelLocation = Center + FVector(0.0f, 0.0f, Extents.Z + 120.0f);
-    SpinSelectionText->SetWorldLocation(LabelLocation);
-    SpinSelectionText->SetText(FText::FromString(FString::Printf(
-        TEXT("SELECTED SPINNER\n%s"),
-        *GetSpinDisplayName(SpinHelper)
-    )));
-    SpinSelectionText->SetHiddenInGame(false);
-
-    APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0);
-    if (IsValid(PC) && IsValid(PC->PlayerCameraManager))
-    {
-        FRotator FacingRotation = (PC->PlayerCameraManager->GetCameraLocation() - LabelLocation).Rotation();
-        FacingRotation.Pitch = 0.0f;
-        FacingRotation.Roll = 0.0f;
-        SpinSelectionText->SetWorldRotation(FacingRotation);
-    }
-
-    ShowStatusMessage(FString::Printf(TEXT("Selected spinner: %s"), *GetSpinDisplayName(SpinHelper)));
-}
-
-void AGMGameMasterDirector::SelectPreviousPlatform()
-{
-    if (PlatformTargets.Num() == 0)
-    {
-        ShowStatusMessage(TEXT("No platform targets found."));
-        return;
-    }
-
-    SelectedPlatformIndex = (SelectedPlatformIndex - 1 + PlatformTargets.Num()) % PlatformTargets.Num();
-    UpdatePlatformHighlight();
-}
-
-void AGMGameMasterDirector::SelectNextPlatform()
-{
-    if (PlatformTargets.Num() == 0)
-    {
-        ShowStatusMessage(TEXT("No platform targets found."));
-        return;
-    }
-
-    SelectedPlatformIndex = (SelectedPlatformIndex + 1) % PlatformTargets.Num();
-    UpdatePlatformHighlight();
-}
-
-void AGMGameMasterDirector::RaiseSelectedPlatform()
-{
-    if (PlatformTargets.Num() == 0)
-    {
-        ShowStatusMessage(TEXT("No platform selected."));
-        return;
-    }
-
-    FGMPlatformControlEntry& Entry = PlatformTargets[SelectedPlatformIndex];
-    if (IsValid(Entry.Mover))
-    {
-        Entry.Mover->RaisePlatform();
-        UpdatePlatformHighlight();
-    }
-    else
-    {
-        ShowStatusMessage(TEXT("Selected platform has no mover helper."));
-    }
-}
-
-void AGMGameMasterDirector::LowerSelectedPlatform()
-{
-    if (PlatformTargets.Num() == 0)
-    {
-        ShowStatusMessage(TEXT("No platform selected."));
-        return;
-    }
-
-    FGMPlatformControlEntry& Entry = PlatformTargets[SelectedPlatformIndex];
-    if (IsValid(Entry.Mover))
-    {
-        Entry.Mover->LowerPlatform();
-        UpdatePlatformHighlight();
-    }
-    else
-    {
-        ShowStatusMessage(TEXT("Selected platform has no mover helper."));
-    }
-}
-
-void AGMGameMasterDirector::FreezeSelectedPlatform()
-{
-    if (PlatformTargets.Num() == 0)
-    {
-        ShowStatusMessage(TEXT("No platform selected."));
-        return;
-    }
-
-    FGMPlatformControlEntry& Entry = PlatformTargets[SelectedPlatformIndex];
-    if (IsValid(Entry.IceZone))
-    {
-        Entry.IceZone->ActivateIceZone(5.0f, 5.0f);
-        ShowStatusMessage(FString::Printf(TEXT("Ice armed on: %s"), *GetPlatformDisplayName(Entry)));
-    }
-    else
-    {
-        ShowStatusMessage(TEXT("Selected platform has no ice zone helper."));
-    }
-}
-
-void AGMGameMasterDirector::CollapseSelectedPlatform()
-{
-    if (PlatformTargets.Num() == 0)
-    {
-        ShowStatusMessage(TEXT("No platform selected."));
-        return;
-    }
-
-    FGMPlatformControlEntry& Entry = PlatformTargets[SelectedPlatformIndex];
-    if (IsValid(Entry.Collapse))
-    {
-        Entry.Collapse->CollapsePlatform();
-        ShowStatusMessage(FString::Printf(TEXT("Collapsed: %s"), *GetPlatformDisplayName(Entry)));
-    }
-    else
-    {
-        ShowStatusMessage(TEXT("Selected platform has no collapse helper."));
-    }
-}
-
-void AGMGameMasterDirector::ResetSelectedPlatform()
-{
-    if (PlatformTargets.Num() == 0)
-    {
-        ShowStatusMessage(TEXT("No platform selected."));
-        return;
-    }
-
-    FGMPlatformControlEntry& Entry = PlatformTargets[SelectedPlatformIndex];
-
-    if (IsValid(Entry.Mover))
-    {
-        Entry.Mover->ResetPlatform();
-    }
-
-    if (IsValid(Entry.Collapse))
-    {
-        Entry.Collapse->RestorePlatform();
-    }
-
-    if (IsValid(Entry.IceZone))
-    {
-        Entry.IceZone->DeactivateIceZone();
-    }
-
-    UpdatePlatformHighlight();
-    ShowStatusMessage(FString::Printf(TEXT("Reset platform: %s"), *GetPlatformDisplayName(Entry)));
-}
-
-void AGMGameMasterDirector::SelectPreviousSpin()
-{
-    if (SpinTargets.Num() == 0)
-    {
-        ShowStatusMessage(TEXT("No spin targets found."));
-        return;
-    }
-
-    SelectedSpinIndex = (SelectedSpinIndex - 1 + SpinTargets.Num()) % SpinTargets.Num();
-    UpdateSpinHighlight();
-}
-
-void AGMGameMasterDirector::SelectNextSpin()
-{
-    if (SpinTargets.Num() == 0)
-    {
-        ShowStatusMessage(TEXT("No spin targets found."));
-        return;
-    }
-
-    SelectedSpinIndex = (SelectedSpinIndex + 1) % SpinTargets.Num();
-    UpdateSpinHighlight();
-}
-
-void AGMGameMasterDirector::IncreaseSelectedSpinSpeed()
-{
-    if (SpinTargets.Num() == 0)
-    {
-        ShowStatusMessage(TEXT("No spin target selected."));
-        return;
-    }
-
-    AGMSpinObstacle* SpinHelper = SpinTargets[SelectedSpinIndex];
-    if (!IsValid(SpinHelper))
-    {
-        ShowStatusMessage(TEXT("Selected spin helper is invalid."));
-        return;
-    }
-
-    SpinHelper->IncreaseSpinSpeed();
-    UpdateSpinHighlight();
+    NextGlobalReadyTime = Now + GlobalActionCooldown;
 
     ShowStatusMessage(FString::Printf(
-        TEXT("%s speed is now %.1f"),
-        *GetSpinDisplayName(SpinHelper),
-        SpinHelper->GetCurrentSpinSpeed()
+        TEXT("Triggered slot %d: %s | %s"),
+        SlotIndex + 1,
+        *GetControlTypeName(Slot.ControlType),
+        *Slot.DisplayName
     ));
+}
+
+void AGMGameMasterDirector::TriggerSlot1()
+{
+    TriggerSlotByIndex(0);
+}
+
+void AGMGameMasterDirector::TriggerSlot2()
+{
+    TriggerSlotByIndex(1);
+}
+
+void AGMGameMasterDirector::TriggerSlot3()
+{
+    TriggerSlotByIndex(2);
+}
+
+void AGMGameMasterDirector::ForceRefreshTargets()
+{
+    RefreshHelperCaches();
+    UpdateLiveSlots();
 }
