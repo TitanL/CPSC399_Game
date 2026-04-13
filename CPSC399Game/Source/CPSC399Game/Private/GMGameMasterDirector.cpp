@@ -364,6 +364,8 @@ void AGMGameMasterDirector::TriggerSlotByIndex(int32 SlotIndex)
             bActivated = true;
         }
         break;
+    
+    
     }
 
     default:
