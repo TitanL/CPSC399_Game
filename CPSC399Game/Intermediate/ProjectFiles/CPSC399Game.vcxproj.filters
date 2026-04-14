@@ -1,0 +1,99 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <None Include="..\..\CPSC399Game.uproject" />
+    <Filter Include="Source">
+      <UniqueIdentifier>{994F1D9F-E89D-4D63-B4D2-AAA243FF09A4}</UniqueIdentifier>
+    </Filter>
+    <None Include="..\..\Source\CPSC399Game.Target.cs">
+      <Filter>Source</Filter>
+    </None>
+    <None Include="..\..\Source\CPSC399GameEditor.Target.cs">
+      <Filter>Source</Filter>
+    </None>
+    <Filter Include="Config">
+      <UniqueIdentifier>{EB4A7EB8-E5C8-4A0B-9BEF-8F29B55A3B20}</UniqueIdentifier>
+    </Filter>
+    <None Include="..\..\Config\DefaultEditor.ini">
+      <Filter>Config</Filter>
+    </None>
+    <None Include="..\..\Config\DefaultEditorPerProjectUserSettings.ini">
+      <Filter>Config</Filter>
+    </None>
+    <None Include="..\..\Config\DefaultEngine.ini">
+      <Filter>Config</Filter>
+    </None>
+    <None Include="..\..\Config\DefaultGame.ini">
+      <Filter>Config</Filter>
+    </None>
+    <None Include="..\..\Config\DefaultInput.ini">
+      <Filter>Config</Filter>
+    </None>
+    <Filter Include="Source\CPSC399Game">
+      <UniqueIdentifier>{5CC2122C-594F-459E-BF88-694407D1F350}</UniqueIdentifier>
+    </Filter>
+    <None Include="..\..\Source\CPSC399Game\CPSC399Game.Build.cs">
+      <Filter>Source\CPSC399Game</Filter>
+    </None>
+    <ClCompile Include="..\..\Source\CPSC399Game\CPSC399Game.cpp">
+      <Filter>Source\CPSC399Game</Filter>
+    </ClCompile>
+    <ClInclude Include="..\..\Source\CPSC399Game\CPSC399Game.h">
+      <Filter>Source\CPSC399Game</Filter>
+    </ClInclude>
+    <ClCompile Include="..\..\Source\CPSC399Game\MyActor.cpp">
+      <Filter>Source\CPSC399Game</Filter>
+    </ClCompile>
+    <ClInclude Include="..\..\Source\CPSC399Game\MyActor.h">
+      <Filter>Source\CPSC399Game</Filter>
+    </ClInclude>
+    <Filter Include="Source\CPSC399Game\Private">
+      <UniqueIdentifier>{C63835E8-9095-4948-8B89-6F2FEB032F49}</UniqueIdentifier>
+    </Filter>
+    <ClCompile Include="..\..\Source\CPSC399Game\Private\GMGameMasterController.cpp">
+      <Filter>Source\CPSC399Game\Private</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\CPSC399Game\Private\GMGameMasterDirector.cpp">
+      <Filter>Source\CPSC399Game\Private</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\CPSC399Game\Private\GMIceZone.cpp">
+      <Filter>Source\CPSC399Game\Private</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\CPSC399Game\Private\GMPlatformCollapse.cpp">
+      <Filter>Source\CPSC399Game\Private</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\CPSC399Game\Private\GMPlatformMover.cpp">
+      <Filter>Source\CPSC399Game\Private</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\CPSC399Game\Private\GMRunnerCharacter.cpp">
+      <Filter>Source\CPSC399Game\Private</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\CPSC399Game\Private\GMSpinObstacle.cpp">
+      <Filter>Source\CPSC399Game\Private</Filter>
+    </ClCompile>
+    <Filter Include="Source\CPSC399Game\Public">
+      <UniqueIdentifier>{C2EBA0BE-0077-49D3-8883-D9F383DED7E3}</UniqueIdentifier>
+    </Filter>
+    <ClInclude Include="..\..\Source\CPSC399Game\Public\GMGameMasterController.h">
+      <Filter>Source\CPSC399Game\Public</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\CPSC399Game\Public\GMGameMasterDirector.h">
+      <Filter>Source\CPSC399Game\Public</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\CPSC399Game\Public\GMIceZone.h">
+      <Filter>Source\CPSC399Game\Public</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\CPSC399Game\Public\GMPlatformCollapse.h">
+      <Filter>Source\CPSC399Game\Public</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\CPSC399Game\Public\GMPlatformMover.h">
+      <Filter>Source\CPSC399Game\Public</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\CPSC399Game\Public\GMRunnerCharacter.h">
+      <Filter>Source\CPSC399Game\Public</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\CPSC399Game\Public\GMSpinObstacle.h">
+      <Filter>Source\CPSC399Game\Public</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

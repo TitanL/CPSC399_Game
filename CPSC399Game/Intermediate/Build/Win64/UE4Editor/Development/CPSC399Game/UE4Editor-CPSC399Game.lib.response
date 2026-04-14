@@ -1,0 +1,29 @@
+/NOLOGO
+/errorReport:prompt
+/MACHINE:x64
+/SUBSYSTEM:WINDOWS
+/DEF
+/NAME:"UE4Editor-CPSC399Game.dll"
+/IGNORE:4221
+/NODEFAULTLIB
+"C:\Users\asus\Desktop\Assign 565\My project\CPSC399_Game\CPSC399Game\Intermediate\Build\Win64\CPSC399GameEditor\Development\Engine\SharedPCH.Engine.ShadowErrors.h.obj"
+"C:\Users\asus\Desktop\Assign 565\My project\CPSC399_Game\CPSC399Game\Intermediate\Build\Win64\UE4Editor\Development\CPSC399Game\GMGameMasterController.cpp.obj"
+"C:\Users\asus\Desktop\Assign 565\My project\CPSC399_Game\CPSC399Game\Intermediate\Build\Win64\UE4Editor\Development\CPSC399Game\GMGameMasterDirector.cpp.obj"
+"C:\Users\asus\Desktop\Assign 565\My project\CPSC399_Game\CPSC399Game\Intermediate\Build\Win64\UE4Editor\Development\CPSC399Game\GMIceZone.cpp.obj"
+"C:\Users\asus\Desktop\Assign 565\My project\CPSC399_Game\CPSC399Game\Intermediate\Build\Win64\UE4Editor\Development\CPSC399Game\GMPlatformCollapse.cpp.obj"
+"C:\Users\asus\Desktop\Assign 565\My project\CPSC399_Game\CPSC399Game\Intermediate\Build\Win64\UE4Editor\Development\CPSC399Game\GMPlatformMover.cpp.obj"
+"C:\Users\asus\Desktop\Assign 565\My project\CPSC399_Game\CPSC399Game\Intermediate\Build\Win64\UE4Editor\Development\CPSC399Game\GMRunnerCharacter.cpp.obj"
+"C:\Users\asus\Desktop\Assign 565\My project\CPSC399_Game\CPSC399Game\Intermediate\Build\Win64\UE4Editor\Development\CPSC399Game\GMSpinObstacle.cpp.obj"
+"C:\Users\asus\Desktop\Assign 565\My project\CPSC399_Game\CPSC399Game\Intermediate\Build\Win64\UE4Editor\Development\CPSC399Game\CPSC399Game.cpp.obj"
+"C:\Users\asus\Desktop\Assign 565\My project\CPSC399_Game\CPSC399Game\Intermediate\Build\Win64\UE4Editor\Development\CPSC399Game\MyActor.cpp.obj"
+"C:\Users\asus\Desktop\Assign 565\My project\CPSC399_Game\CPSC399Game\Intermediate\Build\Win64\UE4Editor\Development\CPSC399Game\CPSC399Game.init.gen.cpp.obj"
+"C:\Users\asus\Desktop\Assign 565\My project\CPSC399_Game\CPSC399Game\Intermediate\Build\Win64\UE4Editor\Development\CPSC399Game\GMGameMasterController.gen.cpp.obj"
+"C:\Users\asus\Desktop\Assign 565\My project\CPSC399_Game\CPSC399Game\Intermediate\Build\Win64\UE4Editor\Development\CPSC399Game\GMGameMasterDirector.gen.cpp.obj"
+"C:\Users\asus\Desktop\Assign 565\My project\CPSC399_Game\CPSC399Game\Intermediate\Build\Win64\UE4Editor\Development\CPSC399Game\GMIceZone.gen.cpp.obj"
+"C:\Users\asus\Desktop\Assign 565\My project\CPSC399_Game\CPSC399Game\Intermediate\Build\Win64\UE4Editor\Development\CPSC399Game\GMPlatformCollapse.gen.cpp.obj"
+"C:\Users\asus\Desktop\Assign 565\My project\CPSC399_Game\CPSC399Game\Intermediate\Build\Win64\UE4Editor\Development\CPSC399Game\GMPlatformMover.gen.cpp.obj"
+"C:\Users\asus\Desktop\Assign 565\My project\CPSC399_Game\CPSC399Game\Intermediate\Build\Win64\UE4Editor\Development\CPSC399Game\GMRunnerCharacter.gen.cpp.obj"
+"C:\Users\asus\Desktop\Assign 565\My project\CPSC399_Game\CPSC399Game\Intermediate\Build\Win64\UE4Editor\Development\CPSC399Game\GMSpinObstacle.gen.cpp.obj"
+"C:\Users\asus\Desktop\Assign 565\My project\CPSC399_Game\CPSC399Game\Intermediate\Build\Win64\UE4Editor\Development\CPSC399Game\MyActor.gen.cpp.obj"
+"C:\Users\asus\Desktop\Assign 565\My project\CPSC399_Game\CPSC399Game\Intermediate\Build\Win64\UE4Editor\Development\CPSC399Game\Default.rc2.res"
+/OUT:"C:\Users\asus\Desktop\Assign 565\My project\CPSC399_Game\CPSC399Game\Intermediate\Build\Win64\UE4Editor\Development\CPSC399Game\UE4Editor-CPSC399Game.lib"

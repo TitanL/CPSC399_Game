@@ -1,0 +1,14 @@
+{
+	"Targets": [
+		{
+			"Name": "CPSC399Game",
+			"Path": "C:\\Users\\asus\\Desktop\\Assign 565\\My project\\CPSC399_Game\\CPSC399Game\\Source\\CPSC399Game.Target.cs",
+			"Type": "Game"
+		},
+		{
+			"Name": "CPSC399GameEditor",
+			"Path": "C:\\Users\\asus\\Desktop\\Assign 565\\My project\\CPSC399_Game\\CPSC399Game\\Source\\CPSC399GameEditor.Target.cs",
+			"Type": "Editor"
+		}
+	]
+}

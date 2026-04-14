@@ -1,0 +1,5 @@
+C:\Users\asus\Desktop\Assign 565\My project\CPSC399_Game\CPSC399Game\Intermediate\Build\Win64\UE4Editor\Development\CPSC399Game\Definitions.CPSC399Game.h
+C:\Program Files\Epic Games\UE_4.27\Engine\Source\Runtime\CoreUObject\Public\UObject/GeneratedCppIncludes.h
+C:\Program Files\Epic Games\UE_4.27\Engine\Source\Runtime\CoreUObject\Public\UObject/MetaData.h
+C:\Users\asus\Desktop\Assign 565\My project\CPSC399_Game\CPSC399Game\Source\CPSC399Game/Public/GMGameMasterController.h
+C:\Users\asus\Desktop\Assign 565\My project\CPSC399_Game\CPSC399Game\Intermediate\Build\Win64\UE4Editor\Inc\CPSC399Game\GMGameMasterController.generated.h
